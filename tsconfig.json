@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    // Output
+    "target": "ES2022",                      // Modern JavaScript
+    "module": "commonjs",                    // Node.js module system
+    "lib": ["ES2022"],                       // Standard library
+    "outDir": "./dist",                      // Compiled output
+    "rootDir": "./src",                      // Source code
+    "sourceMap": true,                       // Enable debugging
+
+    // Module Resolution
+    "moduleResolution": "node",              // Node.js resolution
+    "esModuleInterop": true,                 // CommonJS/ES6 compatibility
+    "resolveJsonModule": true,               // Import JSON files
+
+    // Type Checking (STRICT!)
+    "strict": true,                          // Enable all strict checks
+    "noImplicitAny": true,                   // Error on implicit 'any'
+    "strictNullChecks": true,                // Strict null checking
+    "strictFunctionTypes": true,             // Strict function types
+    "noUnusedLocals": true,                  // Error on unused variables
+    "noUnusedParameters": true,              // Error on unused parameters
+    "noImplicitReturns": true,               // All code paths must return
+    "noFallthroughCasesInSwitch": true,     // No fallthrough in switch
+
+    // Additional Checks
+    "skipLibCheck": true,                    // Skip .d.ts checking
+    "forceConsistentCasingInFileNames": true // Case-sensitive imports
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+}
