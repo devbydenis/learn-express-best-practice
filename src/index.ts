@@ -1,5 +1,7 @@
 import express from 'express';
 import path from 'path';
+import cors from 'cors';
+import { corsOptions } from './config/cors';
 import { config } from './config/env';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
@@ -7,6 +9,8 @@ import uploadRoutes from './routes/uploadRoutes';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
+
+app.use(cors(corsOptions));
 
 // Middleware
 app.use(express.json());
