@@ -23,15 +23,7 @@ export const errorHandler = (
         details: err.meta
       });
     }
-
-    // Record not found
-    if (err.code === 'P2025') {
-      return res.status(404).json({
-        success: false,
-        error: 'Resource not found'
-      });
-    }
-
+    
     // Foreign key constraint failed
     if (err.code === 'P2003') {
       return res.status(400).json({
@@ -39,8 +31,17 @@ export const errorHandler = (
         error: 'Invalid reference'
       });
     }
+    
+    // Record not found
+    if (err.code === 'P2025') {
+      return res.status(404).json({
+        success: false,
+        error: 'Resource not found'
+      });
+    }
+    
   }
-
+  
   // Prisma validation errors
   if (err instanceof Prisma.PrismaClientValidationError) {
     return res.status(400).json({
