@@ -1,40 +1,42 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import dotenv from 'dotenv';
-import { errorHandler } from './middleware/errorHandler';
 import userRoutes from './routes/userRoutes';
-import { requestLogger } from './middleware/requestLogger';
-import { config } from './config/env';
+import { errorHandler } from './middleware/errorHandler';
 
+// Load environment variables
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(requestLogger)
+// Built-in middleware
+app.use(express.json());                      // Parse JSON body
+app.use(express.urlencoded({ extended: true }));  // Parse URL-encoded body
 
-// Health check
+// Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// Routes
-app.use('/users', userRoutes);
-
-// Error handlers
-app.use((req: Request, res: Response): void => {
-  res.status(404).json({
-    success: false,
-    error: 'Route not found',
-    path: req.path
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString()
   });
 });
 
+// API Routes
+app.use('/users', userRoutes);
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: 'Route not found'
+  });
+});
+
+// Global error handler (MUST be last!)
 app.use(errorHandler);
 
-app.listen(config.port, () => {
-  console.log(`✅ Server running on http://localhost:${config.port}`);
-  console.log(`📝 Environment: ${config.nodeEnv}`);
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
