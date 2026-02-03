@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler';
 import userRoutes from './routes/userRoutes';
+import { requestLogger } from './middleware/requestLogger';
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger)
 
 // Health check
 app.get('/health', (req, res) => {
@@ -28,6 +30,7 @@ app.use((req: Request, res: Response): void => {
     path: req.path
   });
 });
+
 app.use(errorHandler);
 
 app.listen(PORT, () => {
