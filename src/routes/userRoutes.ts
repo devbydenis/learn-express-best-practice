@@ -240,7 +240,7 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response) => {
  */
 router.get(
   '/profile',
-  authMiddleware,  // Require auth
+  authMiddleware,  // Require auth to see profile
   asyncHandler(async (req, res) => {
     const userId = req.user!.userId;  // From authMiddleware
 
@@ -282,7 +282,7 @@ router.get(
  */
 router.put(
   '/profile',
-  authMiddleware,
+  authMiddleware, // required auth to update profile
   asyncHandler(async (req, res) => {
     const userId = req.user!.userId;
     const { name } = req.body;

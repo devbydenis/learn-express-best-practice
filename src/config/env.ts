@@ -1,29 +1,42 @@
 import dotenv from 'dotenv';
 
-// Load .env file
 dotenv.config();
 
 /**
- * Validate required environment variables
+ * Centralized environment configuration
+ * Validate required variables at startup
  */
-const requiredEnvVars = ['PORT'];
 
-for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    throw new Error(`❌ Missing required environment variable: ${envVar}`);
+// Required environment variables
+const requiredEnvVars = [
+  'DATABASE_URL',
+  'JWT_SECRET'
+];
+
+// Validate
+for (const varName of requiredEnvVars) {
+  if (!process.env[varName]) {
+    throw new Error(`Missing required environment variable: ${varName}`);
   }
 }
 
-/**
- * Application configuration
- * Type-safe and validated
- */
+// Export typed config
 export const config = {
+  // Server
   port: parseInt(process.env.PORT || '3000'),
   nodeEnv: process.env.NODE_ENV || 'development',
 
-  // Helper properties
-  isDevelopment: process.env.NODE_ENV === 'development',
-  isProduction: process.env.NODE_ENV === 'production',
-  isTest: process.env.NODE_ENV === 'test'
-} as const;
+  // Database
+  databaseUrl: process.env.DATABASE_URL!,
+
+  // JWT
+  jwt: {
+    secret: process.env.JWT_SECRET!,
+    expiresIn: process.env.JWT_EXPIRES_IN || '24h'
+  },
+
+  // Bcrypt
+  bcrypt: {
+    rounds: parseInt(process.env.BCRYPT_ROUNDS || '10')
+  }
+} as const;  // Make readonly
