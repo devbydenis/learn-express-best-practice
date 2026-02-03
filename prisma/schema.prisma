@@ -1,0 +1,36 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Model User (mirip struct di Golang)
+model User {
+  id        Int      @id @default(autoincrement())  // Primary key, auto increment
+  email     String   @unique                        // Email harus unik
+  name      String
+  password  String                                  // Hashed password
+  createdAt DateTime @default(now())                // Auto timestamp
+  updatedAt DateTime @updatedAt                     // Auto update timestamp
+  posts     Post[]                                  // Relasi one-to-many ke Post
+}
+
+// Model Post
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String?                                 // Optional (nullable)
+  published Boolean  @default(false)
+  authorId  Int                                     // Foreign key ke User
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)  // Cascade delete
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
