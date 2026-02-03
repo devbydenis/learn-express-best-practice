@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler';
 import userRoutes from './routes/userRoutes';
 import { requestLogger } from './middleware/requestLogger';
+import { config } from './config/env';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use((req: Request, res: Response): void => {
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+app.listen(config.port, () => {
+  console.log(`✅ Server running on http://localhost:${config.port}`);
+  console.log(`📝 Environment: ${config.nodeEnv}`);
 });
