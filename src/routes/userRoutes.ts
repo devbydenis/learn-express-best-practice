@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import prisma from '../config/database';
-import { validate, createUserSchema, updateUserSchema } from '../validators/userValidator';
 import { asyncHandler } from '../utils/asyncHandler';
+import { validate, createUserSchema, updateUserSchema } from '../validators/userValidator';
 import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = express.Router();
@@ -10,50 +10,54 @@ const router = express.Router();
  * CREATE - Insert user baru
  * POST /users
  */
-router.post('/', validate(createUserSchema), asyncHandler(async (req: Request, res: Response) => {
-  const { email, name, password } = req.body;
+router.post(
+  '/', 
+  validate(createUserSchema), 
+  asyncHandler(async (req: Request, res: Response) => {
+    const { email, name, password } = req.body;
 
-  // Basic validation
-  if (!email || !name || !password) {
-    res.status(400).json({
-      success: false,
-      error: 'Email, name, and password are required'
-    });
-    return 
-  }
-
-  // Email format validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    res.status(400).json({
-      success: false,
-      error: 'Invalid email format'
-    });
-    return 
-  }
-
-  // Insert ke database (error auto-handled oleh errorHandler middleware)
-  const user = await prisma.user.create({
-    data: {
-      email,
-      name,
-      password  // Di bagian auth nanti akan di-hash
-    },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      createdAt: true
-      // password: false - jangan return password!
+    // Basic validation
+    if (!email || !name || !password) {
+      res.status(400).json({
+        success: false,
+        error: 'Email, name, and password are required'
+      });
+      return 
     }
-  });
 
-  res.status(201).json({
-    success: true,
-    message: 'User created successfully',
-    data: user
-  });
-}));
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid email format'
+      });
+      return 
+    }
+
+    // Insert ke database (error auto-handled oleh errorHandler middleware)
+    const user = await prisma.user.create({
+      data: {
+        email,
+        name,
+        password  // Di bagian auth nanti akan di-hash
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true
+        // password: false - jangan return password!
+      }
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'User created successfully',
+      data: user
+    });
+  })
+);
 
 /**
  * READ - Get all users
@@ -154,48 +158,51 @@ router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
  * UPDATE - Update user
  * PUT /users/:id
  */
-router.put('/:id', validate(updateUserSchema), asyncHandler(async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const { email, name } = req.body;
+router.put(
+  '/:id', 
+  validate(updateUserSchema), 
+  asyncHandler(async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const { email, name } = req.body;
 
-  // Validate ID
-  if (isNaN(id)) {
-    res.status(400).json({
-      success: false,
-      error: 'Invalid user ID'
-    });
-    return 
+    // Validate ID
+    if (isNaN(id)) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid user ID'
+      });
+      return 
   }
 
-  // Prepare update data (only include provided fields)
-  const updateData: { email?: string; name?: string } = {};
-  if (email) updateData.email = email;
-  if (name) updateData.name = name;
+    // Prepare update data (only include provided fields)
+    const updateData: { email?: string; name?: string } = {};
+    if (email) updateData.email = email;
+    if (name) updateData.name = name;
 
-  if (Object.keys(updateData).length === 0) {
-    res.status(400).json({
-      success: false,
-      error: 'No fields to update'
-    });
-    return;
+    if (Object.keys(updateData).length === 0) {
+      res.status(400).json({
+        success: false,
+        error: 'No fields to update'
+      });
+      return;
   }
 
-  // Update user (P2025 error jika user tidak ada akan di-handle oleh errorHandler)
-  const user = await prisma.user.update({
-    where: { id },
-    data: updateData,
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      updatedAt: true
-    }
-  });
+    // Update user (P2025 error jika user tidak ada akan di-handle oleh errorHandler)
+    const user = await prisma.user.update({
+      where: { id },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        updatedAt: true
+      }
+    });
 
-  res.json({
-    success: true,
-    message: 'User updated successfully',
-    data: user
+    res.json({
+      success: true,
+      message: 'User updated successfully',
+      data: user
   });
 }));
 
