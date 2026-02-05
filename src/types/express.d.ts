@@ -1,4 +1,4 @@
-import { JWTPayload } from '../utils/jwt';
+import { JWTPayload } from './user.types';
 
 /**
  * Extend Express Request interface
