@@ -1,7 +1,7 @@
-import express, { Request, Response } from 'express';
-import { upload } from '../config/multer';
-import { asyncHandler } from '../utils/asyncHandler';
-import { authMiddleware } from '../middleware/authMiddleware';
+import express, { Request, Response } from "express";
+import { upload } from "../config/multer";
+import { asyncHandler } from "../utils/asyncHandler";
+import { authMiddleware } from "../middleware/auth.middleware";
 
 const router = express.Router();
 
@@ -10,31 +10,31 @@ const router = express.Router();
  * Protected - requires authentication
  */
 router.post(
-  '/single',
+  "/single",
   authMiddleware,
-  upload.single('image'),  // Fieldname: 'image'
+  upload.single("image"), // Fieldname: 'image'
   asyncHandler(async (req: Request, res: Response) => {
     if (!req.file) {
       res.status(400).json({
         success: false,
-        error: 'No file uploaded'
+        error: "No file uploaded",
       });
       return;
     }
 
     res.json({
       success: true,
-      message: 'File uploaded successfully',
+      message: "File uploaded successfully",
       data: {
         filename: req.file.filename,
         originalname: req.file.originalname,
         mimetype: req.file.mimetype,
         size: req.file.size,
         path: req.file.path,
-        url: `/uploads/${req.file.filename}`
-      }
+        url: `/uploads/${req.file.filename}`,
+      },
     });
-  })
+  }),
 );
 
 /**
@@ -42,14 +42,14 @@ router.post(
  * Protected
  */
 router.post(
-  '/multiple',
+  "/multiple",
   authMiddleware,
-  upload.array('images', 5),  // Max 5 files
+  upload.array("images", 5), // Max 5 files
   asyncHandler(async (req: Request, res: Response) => {
     if (!req.files || req.files.length === 0) {
       res.status(400).json({
         success: false,
-        error: 'No files uploaded'
+        error: "No files uploaded",
       });
       return;
     }
@@ -59,14 +59,14 @@ router.post(
     res.json({
       success: true,
       message: `${files.length} files uploaded successfully`,
-      data: files.map(file => ({
+      data: files.map((file) => ({
         filename: file.filename,
         originalname: file.originalname,
         size: file.size,
-        url: `/uploads/${file.filename}`
-      }))
+        url: `/uploads/${file.filename}`,
+      })),
     });
-  })
+  }),
 );
 
 export default router;

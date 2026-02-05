@@ -1,10 +1,14 @@
-import express, { Request, Response } from 'express';
-import bcrypt from 'bcrypt';
-import { asyncHandler } from '../utils/asyncHandler';
-import { validate, createUserSchema, loginSchema } from '../validators/userValidator';
-import { generateToken } from '../utils/jwt';
-import { config } from '../config/env';
-import prisma from '../config/database';
+import express, { Request, Response } from "express";
+import bcrypt from "bcrypt";
+import { asyncHandler } from "../utils/asyncHandler";
+import {
+  validate,
+  createUserSchema,
+  loginSchema,
+} from "../validators/user.validator";
+import { generateToken } from "../utils/jwt";
+import { config } from "../config/env";
+import prisma from "../config/database";
 
 const router = express.Router();
 
@@ -12,7 +16,7 @@ const router = express.Router();
  * POST /auth/register - Register new user
  */
 router.post(
-  '/register',
+  "/register",
   validate(createUserSchema),
   asyncHandler(async (req: Request, res: Response) => {
     const { email, name, password } = req.body;
@@ -25,54 +29,54 @@ router.post(
       data: {
         email,
         name,
-        password: hashedPassword  // Store hashed password
+        password: hashedPassword, // Store hashed password
       },
       select: {
         id: true,
         email: true,
         name: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
 
     // Generate JWT token
     const token = generateToken({
       userId: user.id,
-      email: user.email
+      email: user.email,
     });
 
     res.status(201).json({
       success: true,
-      message: 'User registered successfully',
+      message: "User registered successfully",
       data: {
         user,
-        token
-      }
+        token,
+      },
     });
-  })
+  }),
 );
 
 /**
  * POST /auth/login - Login user
  */
 router.post(
-  '/login',
+  "/login",
   validate(loginSchema),
   asyncHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
     // Find user by email
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     // User not found
     if (!user) {
       res.status(401).json({
         success: false,
-        error: 'Invalid credentials'
+        error: "Invalid credentials",
       });
-      return 
+      return;
     }
 
     // Verify password
@@ -81,30 +85,30 @@ router.post(
     if (!validPassword) {
       res.status(401).json({
         success: false,
-        error: 'Invalid credentials'
+        error: "Invalid credentials",
       });
-      return 
+      return;
     }
 
     // Generate JWT token
     const token = generateToken({
       userId: user.id,
-      email: user.email
+      email: user.email,
     });
 
     res.json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       data: {
         user: {
           id: user.id,
           email: user.email,
-          name: user.name
+          name: user.name,
         },
-        token
-      }
+        token,
+      },
     });
-  })
+  }),
 );
 
 export default router;

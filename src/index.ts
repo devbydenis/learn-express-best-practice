@@ -3,9 +3,9 @@ import path from 'path';
 import cors from 'cors';
 import { corsOptions } from './config/cors';
 import { config } from './config/env';
-import authRoutes from './routes/authRoutes';
-import userRoutes from './routes/userRoutes';
-import uploadRoutes from './routes/uploadRoutes';
+import authRoutes from './routes/auth.route';
+import userRoutes from './routes/user.route';
+import uploadRoutes from './routes/upload.route';
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
 
