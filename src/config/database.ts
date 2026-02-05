@@ -1,54 +1,52 @@
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
-import "dotenv/config";
+import { PrismaClient, Prisma } from '@prisma/client';
+import logger from './logger';
 
-/**
- * Prisma Client Singleton Pattern untuk Prisma v7+
- * Menggunakan adapter untuk koneksi database langsung
- */
-
-// Extend global type untuk TypeScript
 declare global {
   // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined;
+  var prisma: PrismaClient<Prisma.PrismaClientOptions> | undefined;
 }
 
-// Setup PostgreSQL connection pool
-const connectionString = process.env.DATABASE_URL;
-const pool = new Pool({ connectionString });
-
-// Create adapter
-const adapter = new PrismaPg(pool);
-
-// Singleton instance dengan adapter
+/**
+ * Prisma Client with logging and error handling
+ */
 export const prisma =
   global.prisma ||
   new PrismaClient({
-    adapter,
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["query", "error", "warn"]
-        : ["error"],
+    log: [
+      { level: 'query', emit: 'event' },
+      { level: 'error', emit: 'event' },
+      { level: 'warn', emit: 'event' },
+    ],
   });
 
-// Di development, simpan instance ke global untuk reuse
-if (process.env.NODE_ENV !== "production") {
+// Log queries in development
+if (process.env.NODE_ENV === 'development') {
+  prisma.$on('query' as never, (e: Prisma.QueryEvent) => {
+    logger.debug('Query:', { query: e.query, duration: `${e.duration}ms` });
+  });
+}
+
+// Log errors
+prisma.$on('error' as never, (e: Prisma.LogEvent) => {
+  logger.error('Prisma error:', e);
+});
+
+// Log warnings
+prisma.$on('warn' as never, (e: Prisma.LogEvent) => {
+  logger.warn('Prisma warning:', e);
+});
+
+// Reuse in development
+if (process.env.NODE_ENV !== 'production') {
   global.prisma = prisma;
 }
 
 /**
  * Graceful shutdown
- * Tutup database connections sebelum app shutdown
  */
-async function gracefulShutdown() {
-  console.log("Closing database connections...");
+export const disconnectDatabase = async (): Promise<void> => {
   await prisma.$disconnect();
-  await pool.end();
-  process.exit(0);
-}
-
-process.on("SIGINT", gracefulShutdown); // Ctrl+C
-process.on("SIGTERM", gracefulShutdown); // Kubernetes/Docker shutdown
+  logger.info('Database disconnected');
+};
 
 export default prisma;
