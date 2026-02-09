@@ -1,5 +1,9 @@
 import { UserRepository } from "../repositories/user.repository";
-import { User, UserResponse, UpdateUserDTO } from "../types/user.types";
+import {
+  UserResponse,
+  UpdateUserDTO,
+  CreateUserDTO,
+} from "../types/user.types";
 import { ConflictError } from "../utils/errors";
 import logger from "../config/logger";
 
@@ -21,11 +25,24 @@ export class UserService {
   }
 
   /**
-   * Remove password from user object
+   * Create user
+   *
    */
-  private sanitizeUser(user: User): UserResponse {
-    const { password, ...sanitized } = user;
-    return sanitized;
+
+  async createUser(data: CreateUserDTO): Promise<UserResponse> {
+    // check existing email
+    const emailExist = await this.userRepository.emailExists(data.email);
+    if (emailExist) {
+      throw new ConflictError("Email already exists");
+    }
+
+    logger.info("Created user successfully", { email: data.email });
+
+    const user = await this.userRepository.create(data);
+
+    logger.info("Created user successfully", { userId: user.id });
+
+    return user;
   }
 
   /**
@@ -46,7 +63,7 @@ export class UserService {
     const { users, total } = await this.userRepository.findAll(page, limit);
 
     return {
-      users: users.map((u) => this.sanitizeUser(u)),
+      users,
       pagination: {
         page,
         limit,
@@ -60,8 +77,7 @@ export class UserService {
    * Get user by ID
    */
   async getUserById(id: number): Promise<UserResponse> {
-    const user = await this.userRepository.getById(id);
-    return this.sanitizeUser(user);
+    return this.userRepository.getById(id);
   }
 
   /**
@@ -82,7 +98,7 @@ export class UserService {
 
     logger.info("User updated successfully", { userId: id });
 
-    return this.sanitizeUser(user);
+    return user;
   }
 
   /**
@@ -90,7 +106,19 @@ export class UserService {
    */
   async deleteUser(id: number): Promise<void> {
     logger.info("Deleting user", { userId: id });
+
     await this.userRepository.delete(id);
+
     logger.info("User deleted successfully", { userId: id });
+  }
+
+  /**
+   * Search users by name or email
+   */
+  async searchUsers(query: string): Promise<UserResponse[]> {
+    logger.debug("Searching users", { query });
+
+    const users = await this.userRepository.search(query);
+    return users;
   }
 }
