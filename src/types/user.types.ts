@@ -5,7 +5,7 @@ export interface User {
   id: number;
   email: string;
   name: string;
-  password: string;
+  password?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,3 +57,5 @@ export interface JWTPayload {
   iat?: number;
   exp?: number;
 }
+
+export type UserWithOptionalPassword = Omit<User, 'password'> & { password?: string };
