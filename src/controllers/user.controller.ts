@@ -43,7 +43,20 @@ export class UserController {
     });
   };
 
-  getUserId = async (req: Request, res: Response): Promise<void> => {
+  updateProfile = async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user!.userId;
+    const { email, name } = req.body;
+
+    const user = await this.userService.updateUser(userId, { email, name });
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: user
+    })
+  };
+
+  getUserById = async (req: Request, res: Response): Promise<void> => {
     // ID validation moved to middleware or handled by error handler
     const userId = this.validateUserId(req.params.id);
 
@@ -95,7 +108,7 @@ export class UserController {
   };
 
   private validateUserId(idParam: string | string[]): number {
-    const id = Array.isArray(idParam) ? idParam[0] : idParam
+    const id = Array.isArray(idParam) ? idParam[0] : idParam;
 
     if (!id || !id.trim()) {
       throw new BadRequestError("User ID is required");

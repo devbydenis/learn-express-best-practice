@@ -57,5 +57,3 @@ export interface JWTPayload {
   iat?: number;
   exp?: number;
 }
-
-export type UserWithOptionalPassword = Omit<User, 'password'> & { password?: string };
