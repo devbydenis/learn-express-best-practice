@@ -1,5 +1,5 @@
-import { Response, NextFunction } from 'express';
-import { verifyToken } from '../utils/jwt';
+import { Request, Response, NextFunction } from "express";
+import { verifyToken } from "../utils/jwt";
 
 /**
  * Authentication middleware
@@ -9,34 +9,40 @@ import { verifyToken } from '../utils/jwt';
  * router.get('/protected', authMiddleware, handler)
  */
 export const authMiddleware = (
-  req: any,  // Using any because of Express.Request extension
+  req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     // Get Authorization header
     const authHeader = req.headers.authorization;
-    console.log(authHeader);
 
     if (!authHeader) {
       res.status(401).json({
         success: false,
-        error: 'No token provided'
+        error: "No token provided",
       });
       return;
     }
 
     // Check format: "Bearer <token>"
-    if (!authHeader.startsWith('Bearer ')) {
+    if (!authHeader.startsWith("Bearer ")) {
       res.status(401).json({
         success: false,
-        error: 'Invalid token format. Use: Bearer <token>'
+        error: "Invalid token format. Use: Bearer <token>",
       });
       return;
     }
 
     // Extract token
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      res.status(401).json({
+        success: false,
+        error: "Token is empty",
+      });
+      return;
+    }
 
     // Verify token
     const decoded = verifyToken(token);
@@ -44,11 +50,12 @@ export const authMiddleware = (
     // Inject user info ke request
     req.user = decoded;
 
-    next();
+    return next();
   } catch (error) {
+    console.error('Auth middleware error:', error);
     res.status(401).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Authentication failed'
+      error: "Invalid or expired token"
     });
     return;
   }
