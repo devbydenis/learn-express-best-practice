@@ -76,3 +76,12 @@ export class InternalServerError extends AppError {
     super(500, message, false);  // Not operational
   }
 }
+
+/**
+ * 429 Too Many Request 
+ */
+export class RateLimitterError extends AppError {
+  constructor(message = 'Too many request') {
+    super(500, message, false)
+  }
+}
