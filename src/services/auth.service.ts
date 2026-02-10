@@ -7,7 +7,7 @@ import {
   AuthResponse,
   LoginDTO,
 } from "../types/user.types";
-import { generateToken, verifyToken } from "../utils/jwt";
+import { generateToken } from "../utils/jwt";
 import { ConflictError, UnauthorizedError } from "../utils/errors";
 import { config } from "../config/env";
 import logger from "../config/logger";
@@ -106,19 +106,6 @@ export class AuthService {
       user: this.sanitizeUser(user),
       token,
     };
-  }
-
-  /**
-   * Verify token (optional - untuk refresh token)
-   */
-  async verifyToken(token: string): Promise<boolean> {
-    try {
-      const decoded = verifyToken(token);
-      const user = await this.userRepository.findById(decoded.userId);
-      return !!user;
-    } catch (error) {
-      return false;
-    }
   }
 
   /**

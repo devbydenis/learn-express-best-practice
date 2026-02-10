@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt";
+import { UnauthorizedError } from "../utils/errors";
+import logger from "../config/logger";
 
 /**
  * Authentication middleware
@@ -10,38 +12,27 @@ import { verifyToken } from "../utils/jwt";
  */
 export const authMiddleware = (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ) => {
   try {
     // Get Authorization header
     const authHeader = req.headers.authorization;
 
+    // Check header
     if (!authHeader) {
-      res.status(401).json({
-        success: false,
-        error: "No token provided",
-      });
-      return;
+      throw new UnauthorizedError("No token provided");
     }
 
     // Check format: "Bearer <token>"
     if (!authHeader.startsWith("Bearer ")) {
-      res.status(401).json({
-        success: false,
-        error: "Invalid token format. Use: Bearer <token>",
-      });
-      return;
+      throw new UnauthorizedError("Invalid token format. Use: Bearer <token>");
     }
 
     // Extract token
     const token = authHeader.split(" ")[1];
     if (!token) {
-      res.status(401).json({
-        success: false,
-        error: "Token is empty",
-      });
-      return;
+      throw new UnauthorizedError("Token is empty");
     }
 
     // Verify token
@@ -52,11 +43,8 @@ export const authMiddleware = (
 
     return next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
-    res.status(401).json({
-      success: false,
-      error: "Invalid or expired token"
-    });
-    return;
+    logger.warn("Auth failed", { error: (error as Error).message });
+
+    next(new UnauthorizedError("Invalid or expired token"))
   }
 };

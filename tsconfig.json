@@ -25,7 +25,10 @@
 
     // Additional Checks
     "skipLibCheck": true,                    // Skip .d.ts checking
-    "forceConsistentCasingInFileNames": true // Case-sensitive imports
+    "forceConsistentCasingInFileNames": true, // Case-sensitive imports
+
+    // Type Declaration
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]

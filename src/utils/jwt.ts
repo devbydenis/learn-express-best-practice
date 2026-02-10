@@ -1,14 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env';
-
-/**
- * JWT Payload interface
- * Define structure of data stored in token
- */
-export interface JWTPayload {
-  userId: number;
-  email: string;
-}
+import { JWTPayload } from '../types/user.types';
 
 /**
  * Generate JWT token

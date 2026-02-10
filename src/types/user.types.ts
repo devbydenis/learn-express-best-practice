@@ -5,7 +5,7 @@ export interface User {
   id: number;
   email: string;
   name: string;
-  password?: string;
+  password: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +38,11 @@ export interface UpdateUserDTO {
 export interface LoginDTO {
   email: string;
   password: string;
+}
+
+export interface ChangePasswordDTO {
+  oldPassword: string;
+  newPassword: string;
 }
 
 /**
